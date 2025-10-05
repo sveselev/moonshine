@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <repositories>
+    <repository>
+      <id>zemberek-repo</id>
+      <name>Zemberek Maven Repo (GitHub)</name>
+      <url>https://raw.github.com/ahmetaa/maven-repo/master</url>
+    <releases>
+      <enabled>true</enabled>
+    </releases>
+    <snapshots>
+      <enabled>false</enabled>
+    </snapshots>
+    </repository>
+  </repositories>
+
+  <!-- Inherit Spring Boot's dependency management for all modules -->
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.7.8</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+
+  <groupId>com.moonshot</groupId>
+  <artifactId>moonshine</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>moonshine</name>
+  <description>Moonshine parent project</description>
+
+  <modules>
+    <module>buzz</module>
+  </modules>
+
+  <properties>
+    <java.version>11</java.version>
+
+    <!-- Centralize versions (some were missing in buzz/pom.xml) -->
+    <lucene5.version>5.2.1</lucene5.version>
+    <fastutil.version>8.5.11</fastutil.version>
+    <guava.version>31.1-jre</guava.version>
+    <jblas.version>1.2.5</jblas.version>
+    <korean-text.version>4.4.4</korean-text.version>
+    <kuromoji.version>0.9.0</kuromoji.version>
+    <zemberek.version>2.1.1</zemberek.version>
+    <zhconverter.version>1.0</zhconverter.version>
+    <commons-lang3.version>3.14.0</commons-lang3.version>
+    <lombok.version>1.18.30</lombok.version>
+  </properties>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
