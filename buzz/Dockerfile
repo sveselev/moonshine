@@ -1,17 +1,22 @@
-# Runtime image using Amazon Corretto 21 (Java 21)
-FROM amazoncorretto:21-alpine
+# syntax=docker/dockerfile:1
 
-# Set a non-root working directory
+# --- Build stage ---
+FROM maven:3.9-amazoncorretto-21 AS build
+WORKDIR /build
+
+# Copy the whole repo so the parent pom and module are available
+COPY . .
+
+# Build only the buzz module; compile upstream modules as needed; skip tests for speed
+RUN ./mvnw -q -DskipTests -pl buzz -am clean package
+
+# --- Runtime stage ---
+FROM amazoncorretto:21-alpine
 WORKDIR /app
 
-# Copy the Spring Boot fat jar built locally (make sure you run `mvn -pl buzz -am package` first)
-COPY target/buzz-0.0.1-SNAPSHOT.jar app.jar
+# Copy the fat jar produced in the build stage
+COPY --from=build /build/buzz/target/buzz-*.jar app.jar
 
-# Expose the default Spring Boot port
 EXPOSE 8080
-
-# Optional JVM tuning hooks
 ENV JAVA_OPTS=""
-
-# Run the application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar app.jar"]
