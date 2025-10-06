@@ -1,4 +1,4 @@
-package com.moonshot.buzz;
+package com.moonshot.buzz.controller;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.boot.web.servlet.error.ErrorController;

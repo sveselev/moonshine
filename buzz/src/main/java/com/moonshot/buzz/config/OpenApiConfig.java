@@ -1,4 +1,4 @@
-package com.moonshot.buzz.buzz3.config;
+package com.moonshot.buzz.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

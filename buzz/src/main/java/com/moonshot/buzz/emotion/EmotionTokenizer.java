@@ -113,16 +113,16 @@ public class EmotionTokenizer extends Tokenizer {
         HASHTAG_STR
     };
 
-    private EmotionTokenizerImpl scanner;
+    private final EmotionTokenizerImpl scanner;
     private int minTokenLength = 2;
     private int maxTokenLength = StandardAnalyzer.DEFAULT_MAX_TOKEN_LENGTH;
 
     // this tokenizer generates three attributes:
     // offset, positionIncrement and type
-    private CharTermAttribute termAtt;
-    private OffsetAttribute offsetAtt;
-    private PositionIncrementAttribute posIncrAtt;
-    private TypeAttribute typeAtt;
+    private final CharTermAttribute termAtt;
+    private final OffsetAttribute offsetAtt;
+    private final PositionIncrementAttribute posIncrAtt;
+    private final TypeAttribute typeAtt;
 
     private int skippedPositions;
 
