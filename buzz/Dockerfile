@@ -19,4 +19,4 @@ COPY --from=build /build/buzz/target/buzz-*.jar app.jar
 
 EXPOSE 8080
 ENV JAVA_OPTS=""
-ENTRYPOINT ["sh","-c","java $JAVA_OPTS -Dserver.port=${PORT:-8080} -jar app.jar"]
+ENTRYPOINT ["sh","-c","exec java $JAVA_OPTS -jar app.jar"]
