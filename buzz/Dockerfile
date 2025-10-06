@@ -18,5 +18,5 @@ WORKDIR /app
 COPY --from=build /build/buzz/target/buzz-*.jar app.jar
 
 EXPOSE 8080
-ENV JAVA_OPTS=""
+ENV JAVA_OPTS="-Xms128m -Xmx512m -XX:MaxMetaspaceSize=256m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
 ENTRYPOINT ["sh","-c","exec java $JAVA_OPTS -jar app.jar"]

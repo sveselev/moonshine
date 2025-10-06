@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -167,11 +168,13 @@ public class BuzzController {
     @Configuration
     public static class BuzzControllerConfiguration {
         @Bean
+        @Lazy
         public EmotionClassifier getEmotionClassifier() {
             return BuzzEmotionClassifier.INSTANCE;
         }
 
         @Bean
+        @Lazy
         public SentimentClassifier getSentimentClassifier() {
             return SimpleBuzz.INSTANCE;
         }
