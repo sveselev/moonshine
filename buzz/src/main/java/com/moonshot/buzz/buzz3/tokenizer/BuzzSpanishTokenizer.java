@@ -63,7 +63,7 @@ public class BuzzSpanishTokenizer extends BuzzTokenizer {
         "porque", "por", "que", "como", "cuanto", "cuantos", "cuanta", "cuantas", "quien", "entonces", "entonce", "alguin", "algun", "alguno", "alguna",
         "algunas", "algunos", "alguien",
         "via", "demas");
-    private Object2IntOpenHashMap<String> stemSpellMap = new Object2IntOpenHashMap<>();
+    private final Object2IntOpenHashMap<String> stemSpellMap = new Object2IntOpenHashMap<>();
     private static final Set<String> conjunctiveWords = ImmutableSet.of("chmodelpunctuation", "chmodelquestion", "chmodelexclamation");
 
     @Override
@@ -80,7 +80,7 @@ public class BuzzSpanishTokenizer extends BuzzTokenizer {
             s = s.replaceAll("\\s+", "");
             int j = 1;
 
-            if (!s.equals("") && !s.equals("chmodelpunctuation")) {
+            if (!s.isEmpty() && !s.equals("chmodelpunctuation")) {
                 if (notWords.contains(s)) {
                     while (true) {
 

@@ -16,7 +16,7 @@ public class BuzzRussianTokenizer extends BuzzTokenizer {
     private static final String stemSpellFile = "/com/moonshot/buzz/sentiment/tokenizer/russianStemSpell.map";
     private static final Set<String> notWords = ImmutableSet.of("не", "ни");
 
-    private Object2IntOpenHashMap<String> stemSpellMap = new Object2IntOpenHashMap<>();
+    private final Object2IntOpenHashMap<String> stemSpellMap = new Object2IntOpenHashMap<>();
 
     @Override
     protected void initializeResources() throws Exception {

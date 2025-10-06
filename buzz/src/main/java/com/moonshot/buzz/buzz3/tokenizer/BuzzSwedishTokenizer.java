@@ -21,7 +21,7 @@ public class BuzzSwedishTokenizer extends BuzzTokenizer {
             s = s.replaceAll("\\s+", "");
             int j = 1;
 
-            if (!s.equals("") && !s.equals("chmodelpunctuation")) {
+            if (!s.isEmpty() && !s.equals("chmodelpunctuation")) {
                 if (notWords.contains(s)) {
                     transformedList.add(getVocabulary().getInt(s));
                     while (true) {

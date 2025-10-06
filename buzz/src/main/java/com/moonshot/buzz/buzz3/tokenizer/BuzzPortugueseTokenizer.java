@@ -25,11 +25,11 @@ public class BuzzPortugueseTokenizer extends BuzzTokenizer {
     private static final Set<String> conjunctiveWords = ImmutableSet.of("chmodelpunctuation", "chmodelquestion", "chmodelexclamation");
 
     private Set<String> skipWords;
-    private Object2IntOpenHashMap<String> stemSpellMap = new Object2IntOpenHashMap<>();
+    private final Object2IntOpenHashMap<String> stemSpellMap = new Object2IntOpenHashMap<>();
 
     @Override
     protected void initializeResources() throws Exception {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(stopwordsFile)));) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(stopwordsFile)))) {
             String line = null;
             Set<String> skip = new HashSet<>();
             while ((line = reader.readLine()) != null) {
@@ -49,7 +49,7 @@ public class BuzzPortugueseTokenizer extends BuzzTokenizer {
             s = s.replaceAll("\\s+", "");
             int j = 1;
 
-            if (!s.equals("") && !s.equals("chmodelpunctuation")) {
+            if (!s.isEmpty() && !s.equals("chmodelpunctuation")) {
                 if (notWords.contains(s)) {
                     while (true) {
 
