@@ -8,7 +8,7 @@ WORKDIR /build
 COPY . .
 
 # Build only the buzz module; compile upstream modules as needed; skip tests for speed
-RUN ./mvnw -q -DskipTests -pl buzz -am clean package
+RUN mvn -q -B -DskipTests -pl buzz -am clean package
 
 # --- Runtime stage ---
 FROM amazoncorretto:21-alpine
@@ -19,4 +19,4 @@ COPY --from=build /build/buzz/target/buzz-*.jar app.jar
 
 EXPOSE 8080
 ENV JAVA_OPTS=""
-ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["sh","-c","java $JAVA_OPTS -Dserver.port=${PORT:-8080} -jar app.jar"]
