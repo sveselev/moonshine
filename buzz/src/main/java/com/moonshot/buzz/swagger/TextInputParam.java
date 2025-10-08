@@ -12,5 +12,5 @@ import java.lang.annotation.Target;
 @Parameter(
         name = "text",
         description = "Text snippet to analyze",
-        example = "We don't need no education ")
+        example = "We don't need no education")
 public @interface TextInputParam {}

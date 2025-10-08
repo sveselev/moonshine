@@ -20,4 +20,9 @@ public interface EmotionClassifier {
      */
     Map<EmotionLabel, Float> score(String text, SupportedLanguage lang);
 
+    /**
+     * Get all emotion category scores for some text sorted from high to low
+     * @param lang currently unused - for future extension to non-english
+     */
+    Map<EmotionLabel, Float> score(String text, SupportedLanguage lang, boolean sorted);
 }

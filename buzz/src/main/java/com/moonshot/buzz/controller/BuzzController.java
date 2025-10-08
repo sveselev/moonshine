@@ -27,9 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -46,6 +44,96 @@ public class BuzzController {
     public BuzzController(EmotionClassifier emotionClassifier, SentimentClassifier sentimentClassifier) {
         this.emotionClassifier = emotionClassifier;
         this.sentimentClassifier = sentimentClassifier;
+    }
+
+    @Operation(
+            summary = "Quick emotion & sentiment labels",
+            description = "Convenience endpoint returning top emotion and sentiment labels for the text."
+    )
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Labels map", content = @Content(mediaType = "application/json"))})
+    @GetMapping()
+    public ResponseEntity<?> getBuzz(
+            @TextInputParam
+            @RequestParam String text,
+            @LanguageParam
+            @RequestParam(defaultValue = DEFAULT_LNG) String lang) {
+        Map<String, String> res = new HashMap<>();
+        res.put("Emotion", emotionClassifier.classify(text, DEFAULT_LNG).map(Enum::name).orElse("NO EMOTION"));
+        res.put("Sentiment", sentimentClassifier.computeSentiment(text, lang).name());
+        return ResponseEntity.ok(res);
+    }
+
+    @Operation(
+            summary = "Combined emotion and sentiment scores",
+            description = "Returns both emotion scores and sentiment probability scores for the supplied text and language."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Composite score map",
+                    content = @Content(mediaType = "application/json"))
+    })
+    @GetMapping(path = "/score", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getBuzzScore(
+            @TextInputParam
+            @RequestParam(defaultValue = DEFAULT_TXT) String text,
+            @LanguageParam
+            @RequestParam(defaultValue = DEFAULT_LNG) String lang) {
+
+        Map<EmotionLabel, Float> emoMap = emotionClassifier.score(text, SupportedLanguage.English, true);
+        Map<String, BigDecimal> emoRes = emoMap.entrySet().stream().collect(
+                Collectors.toMap(e -> e.getKey().name(),
+                        e -> BigDecimal.valueOf(e.getValue()).setScale(4, RoundingMode.HALF_UP),
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+
+        SentimentResult result = sentimentClassifier.computeSentimentWithScores(text, lang);
+        Map<String, BigDecimal> buzzMap = new HashMap<>();
+        buzzMap.put(SentimentLabel.NEUTRAL.name(), BigDecimal.valueOf(result.getNeutralScore()).setScale(4, RoundingMode.HALF_UP));
+        buzzMap.put(SentimentLabel.POSITIVE.name(), BigDecimal.valueOf(result.getPositiveScore()).setScale(4, RoundingMode.HALF_UP));
+        buzzMap.put(SentimentLabel.NEGATIVE.name(), BigDecimal.valueOf(result.getNegativeScore()).setScale(4, RoundingMode.HALF_UP));
+
+        buzzMap = buzzMap.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (e1, e2) -> e1, LinkedHashMap::new));
+        Map<String, Map<String, BigDecimal>> resMap = new HashMap<>();
+        resMap.put("Emotion", emoRes);
+        resMap.put("Sentiment", buzzMap);
+
+        return ResponseEntity.ok(resMap);
+    }
+
+    @Operation(
+            summary = "Classify dominant emotion",
+            description = "Returns the dominant emotion label for the provided text (English only)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Emotion label returned",
+                    content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    @GetMapping(path = "/emotion")
+    public ResponseEntity<?> getEmotion(
+            @TextInputParam
+            @RequestParam(defaultValue = DEFAULT_TXT) String text) {
+        Optional<EmotionLabel> emo = emotionClassifier.classify(text, DEFAULT_LNG);
+        return ResponseEntity.ok(emo.map(Enum::name).orElse("NO EMOTION"));
+    }
+
+    @Operation(
+            summary = "Get emotion scores",
+            description = "Returns normalized scores for each emotion for the given text (English only)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Map of emotion scores",
+                    content = @Content(mediaType = "application/json"))
+    })
+    @GetMapping(path = "/emotion/score")
+    public Map<String, Map<EmotionLabel, Float>> getEmotionScore(
+            @TextInputParam
+            @RequestParam(defaultValue = DEFAULT_TXT) String text) {
+        Map<String, Map<EmotionLabel, Float>> response = new HashMap<>();
+        response.put(text, emotionClassifier.score(text, SupportedLanguage.English, true));
+        return response;
     }
 
     @Operation(
@@ -68,86 +156,35 @@ public class BuzzController {
     }
 
     @Operation(
-        summary = "Classify dominant emotion",
-        description = "Returns the dominant emotion label for the provided text (English only)."
+            summary = "Get sentiment scores",
+            description = "Returns sentiment probability scores for the supplied text and language."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Emotion label returned",
-            content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "200", description = "Sentiment score map",
+                    content = @Content(mediaType = "application/json"))
     })
-    @GetMapping(path = "/emotion")
-    public ResponseEntity<?> getEmotion(
-            @TextInputParam
-            @RequestParam(defaultValue = DEFAULT_TXT) String text) {
-        Optional<EmotionLabel> emo = emotionClassifier.classify(text, DEFAULT_LNG);
-        return ResponseEntity.ok(emo.map(Enum::name).orElse("NO EMOTION"));
-    }
-
-    @Operation(
-        summary = "Get emotion scores",
-        description = "Returns normalized scores for each emotion for the given text (English only)."
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Map of emotion scores",
-            content = @Content(mediaType = "application/json"))
-    })
-    @GetMapping(path = "/emotion/score")
-    public Map<String, Map<EmotionLabel, Float>> getScore(
-            @TextInputParam
-            @RequestParam(defaultValue = DEFAULT_TXT) String text) {
-        Map<String, Map<EmotionLabel, Float>> response = new HashMap<>();
-        response.put(text, emotionClassifier.score(text, SupportedLanguage.English));
-        return response;
-    }
-
-    @Operation(
-        summary = "Combined emotion and sentiment scores",
-        description = "Returns both emotion scores and sentiment probability scores for the supplied text and language."
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Composite score map",
-            content = @Content(mediaType = "application/json"))
-    })
-    @GetMapping(path = "/score", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getBuzzScore(
+    @GetMapping(path = "/sentiment/score", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getSentimentScore(
             @TextInputParam
             @RequestParam(defaultValue = DEFAULT_TXT) String text,
             @LanguageParam
             @RequestParam(defaultValue = DEFAULT_LNG) String lang) {
-        Map<String, BigDecimal> emoMap = emotionClassifier.score(text, SupportedLanguage.English)
-                .entrySet().stream().collect(Collectors.toMap(e -> e.getKey().name(), e -> {
-                    BigDecimal bd = BigDecimal.valueOf(e.getValue());
-                    return bd.setScale(4, RoundingMode.HALF_UP);
-                }));
 
         SentimentResult result = sentimentClassifier.computeSentimentWithScores(text, lang);
-        Map<String, BigDecimal> buzzMap = new HashMap<>();
-        buzzMap.put(SentimentLabel.NEUTRAL.name(), BigDecimal.valueOf(result.getNeutralScore()).setScale(4, RoundingMode.HALF_UP));
-        buzzMap.put(SentimentLabel.POSITIVE.name(), BigDecimal.valueOf(result.getPositiveScore()).setScale(4, RoundingMode.HALF_UP));
-        buzzMap.put(SentimentLabel.NEGATIVE.name(), BigDecimal.valueOf(result.getNegativeScore()).setScale(4, RoundingMode.HALF_UP));
+        Map<String, BigDecimal> smtMap = new HashMap<>();
+        smtMap.put(SentimentLabel.NEUTRAL.name(), BigDecimal.valueOf(result.getNeutralScore()).setScale(4, RoundingMode.HALF_UP));
+        smtMap.put(SentimentLabel.POSITIVE.name(), BigDecimal.valueOf(result.getPositiveScore()).setScale(4, RoundingMode.HALF_UP));
+        smtMap.put(SentimentLabel.NEGATIVE.name(), BigDecimal.valueOf(result.getNegativeScore()).setScale(4, RoundingMode.HALF_UP));
+
+        smtMap = smtMap.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (v1, v2) -> v1, LinkedHashMap::new));
 
         Map<String, Map<String, BigDecimal>> resMap = new HashMap<>();
-        resMap.put("Emotion", emoMap);
-        resMap.put("Sentiment", buzzMap);
+        resMap.put(text, smtMap);
 
         return ResponseEntity.ok(resMap);
-    }
-
-    @Operation(
-        summary = "Quick emotion & sentiment labels",
-        description = "Convenience endpoint returning top emotion and sentiment labels for the text."
-    )
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Labels map", content = @Content(mediaType = "application/json"))})
-    @GetMapping()
-    public ResponseEntity<?> getBuzz(
-            @TextInputParam
-            @RequestParam String text,
-            @LanguageParam
-            @RequestParam(defaultValue = DEFAULT_LNG) String lang) {
-        Map<String, String> res = new HashMap<>();
-        res.put("Emotion", emotionClassifier.classify(text, DEFAULT_LNG).map(Enum::name).orElse("NO EMOTION"));
-        res.put("Sentiment", sentimentClassifier.computeSentiment(text, lang).name());
-        return ResponseEntity.ok(res);
     }
 
     @Hidden

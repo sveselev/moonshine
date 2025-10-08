@@ -9,13 +9,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * csullivan - progenitor, jamdor - implementatorer
@@ -92,6 +89,24 @@ public class BuzzEmotionClassifier implements EmotionClassifier {
         return score(text, extractor::extractFeatures, lang);
     }
 
+    /**
+     * Get all emotion category scores for some text sorted from high to low
+     * @param lang currently unused - for future extension to non-english
+     */
+    @Override
+    public Map<EmotionLabel, Float> score(String text, SupportedLanguage lang, boolean sorted) {
+        Map<EmotionLabel, Float> scr = score(text, extractor::extractFeatures, lang);
+        if (sorted) {
+            return scr.entrySet().stream()
+                    .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                    .collect(Collectors.toMap(
+                            Entry::getKey, Entry::getValue,
+                            (v1, v2) -> v1, LinkedHashMap::new));
+        } else {
+            return scr;
+        }
+    }
+
     // extension for custom extractor
     protected Map<EmotionLabel, Float> score(String text, Function<String,List<String>> extractor, SupportedLanguage lang) {
         if (lang == null || StringUtils.isBlank(text)) {
@@ -160,7 +175,7 @@ public class BuzzEmotionClassifier implements EmotionClassifier {
         return probabilityMap;
     }
 
-    private Map<String, Double> loadFeatureMap() throws IOException {
+    private Map<String, Double> loadFeatureMap() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(IDF_FILE_PATH), StandardCharsets.UTF_8));
 
         Map<String, Double> featureMap = new HashMap<>();
