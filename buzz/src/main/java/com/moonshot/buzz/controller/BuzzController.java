@@ -25,6 +25,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -198,12 +199,21 @@ public class BuzzController {
 
     @Hidden
     @GetMapping(value = "/ui", produces = MediaType.TEXT_HTML_VALUE)
-    public ResponseEntity<Resource> ui() throws IOException {
+    public ResponseEntity<Resource> ui() {
         Resource resource = new ClassPathResource("/static/buzz-ui.html");
         if (!resource.exists()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         return ResponseEntity.ok(resource);
+    }
+    // Redirect the site root "/" to the Buzz UI
+    @Hidden
+    @Controller
+    static class RootRedirectController {
+        @GetMapping("/")
+        public String redirectRoot() {
+            return "redirect:/api/buzz/ui";
+        }
     }
 
     @Configuration
