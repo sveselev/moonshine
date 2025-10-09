@@ -20,11 +20,14 @@ import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -193,6 +196,15 @@ public class BuzzController {
         return "Got your text and number !!";
     }
 
+    @Hidden
+    @GetMapping(value = "/ui", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<Resource> ui() throws IOException {
+        Resource resource = new ClassPathResource("/static/buzz-ui.html");
+        if (!resource.exists()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(resource);
+    }
 
     @Configuration
     public static class BuzzControllerConfiguration {

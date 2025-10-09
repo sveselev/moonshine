@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Buzz — Emotion & Sentiment</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; }
+      .card { max-width: 900px; margin: 0 auto; border: 1px solid #ddd; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+      h1 { font-size: 20px; margin: 0 0 16px; }
+      label { font-weight: 600; display: block; margin: 12px 0 6px; }
+      textarea { width: 100%; min-height: 140px; padding: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      select, button, input[type=text] { padding: 8px 10px; font-size: 14px; }
+      .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+      .row > * { margin: 6px 0; }
+      .out { background: #0b1020; color: #c9e2ff; white-space: pre-wrap; padding: 12px; border-radius: 8px; min-height: 80px; overflow:auto }
+      .muted { color: #666; font-size: 12px; }
+      .tag { display:inline-block; background:#eef; color:#334; padding:2px 8px; border-radius:999px; font-size:12px; margin-left:8px }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Buzz — Emotion & Sentiment <span class="tag">/api/buzz/score</span></h1>
+      <div id="app"></div>
+      <p class="muted">Tip: this page calls the same-origin API. Deploying elsewhere may require CORS.</p>
+    </div>
+
+    <!-- React via CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel" data-presets="react">
+      const { useState } = React;
+
+      const LANGS = [
+        { code: 'en', name: 'English' },
+        { code: 'es', name: 'Spanish' },
+        { code: 'fr', name: 'French' },
+        { code: 'de', name: 'German' },
+        { code: 'it', name: 'Italian' },
+        { code: 'tr', name: 'Turkish' },
+        { code: 'zh', name: 'Chinese' },
+        { code: 'ja', name: 'Japanese' },
+        { code: 'ko', name: 'Korean' },
+        { code: 'ru', name: 'Russian' },
+        { code: 'pt', name: 'Portuguese' },
+      ];
+
+      function App() {
+        const [text, setText] = useState('Wish you were here');
+        const [lang, setLang] = useState('en');
+        const [loading, setLoading] = useState(false);
+        const [error, setError] = useState('');
+        const [result, setResult] = useState('');
+
+        async function run() {
+          setLoading(true); setError(''); setResult('');
+          try {
+            const url = `/api/buzz/score?text=${encodeURIComponent(text)}&lang=${encodeURIComponent(lang)}`;
+            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const json = await res.json();
+            setResult(JSON.stringify(json, null, 2));
+          } catch (e) {
+            setError(String(e));
+          } finally {
+            setLoading(false);
+          }
+        }
+
+        return (
+          <>
+            <label htmlFor="txt">Text</label>
+            <textarea id="txt" value={text} onChange={e => setText(e.target.value)} placeholder="Enter text to analyze..." />
+
+            <div className="row">
+              <div>
+                <label htmlFor="lang">Language</label>
+                <select id="lang" value={lang} onChange={e => setLang(e.target.value)}>
+                  {LANGS.map(l => <option key={l.code} value={l.code}>{l.name} ({l.code})</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{visibility:'hidden'}}>run</label>
+                <button onClick={run} disabled={loading}>{loading ? 'Running…' : 'Analyze'}</button>
+              </div>
+            </div>
+
+            {error && <p style={{color:'#b00020'}}>Error: {error}</p>}
+            <label>Result</label>
+            <pre className="out">{result || '—'}</pre>
+          </>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById('app')).render(<App/>);
+    </script>
+  </body>
+</html>
