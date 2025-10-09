@@ -8,16 +8,16 @@
     <style>
       *, *::before, *::after { box-sizing: border-box; }
       body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; }
-      .card { max-width: 900px; margin: 0 auto; border: 1px solid #ddd; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+      .card { max-width: 900px; margin: 0 auto; border: 1px solid #ddd; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,.06); background-color: snow; }
       h1 { font-size: 20px; margin: 0 0 16px; }
       label { font-weight: 600; display: block; margin: 12px 0 6px; }
       textarea { width: 100%; min-height: 120px; padding: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
       select, button, input[type=text] { padding: 8px 10px; font-size: 14px; }
       .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
       .row > * { margin: 6px 0; }
-      .out { background: #0b1020; color: #c9e2ff; white-space: pre-wrap; padding: 12px; border-radius: 8px; min-height: 80px; overflow:auto }
+      .out { background: #0b1020; color: #c9e2ff; white-space: pre-wrap; padding: 12px; border-radius: 8px; min-height: 80px; overflow:auto; }
       .muted { color: #666; font-size: 12px; display: none }
-      .tag { display:inline-block; color:#334; padding:2px 8px; border-radius:999px; font-size:12px; margin-left:8px; font-weight: 160; float: right}
+      .tag { display:inline-block; color:#334; padding:2px 8px; border-radius:999px; font-size:12px; margin-left:8px; font-weight: 160; float: right; }
     </style>
   </head>
   <body>
@@ -50,12 +50,17 @@
             { code: 'fr', name: 'French' },
             { code: 'de', name: 'German' },
             { code: 'it', name: 'Italian' },
+            { code: 'nl', name: 'Dutch' },
+            { code: 'pt', name: 'Portuguese' },
+            { code: 'ru', name: 'Russian' },
+            { code: 'sv', name: 'Sweden' },
             { code: 'tr', name: 'Turkish' },
             { code: 'zh', name: 'Chinese' },
             { code: 'ja', name: 'Japanese' },
             { code: 'ko', name: 'Korean' },
-            { code: 'ru', name: 'Russian' },
-            { code: 'pt', name: 'Portuguese' },
+            { code: 'ar', name: 'Arabic' },
+            { code: 'id', name: 'Indonesian' },
+            { code: 'ms', name: 'Malaysian' },
         ];
 
         function App() {

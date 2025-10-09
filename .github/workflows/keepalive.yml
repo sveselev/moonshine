@@ -1,0 +1,11 @@
+name: keep-render-awake
+on:
+  schedule:
+    - cron: "*/13 * * * *"    # every 13 minutes
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Buzz Status
+        run: curl -fsS https://moonshine-tlao.onrender.com/status > /dev/null || true
