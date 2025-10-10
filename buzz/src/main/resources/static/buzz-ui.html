@@ -15,14 +15,25 @@
       select, button, input[type=text] { padding: 8px 10px; font-size: 14px; }
       .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
       .row > * { margin: 6px 0; }
-      .out { background: #0b1020; color: #c9e2ff; white-space: pre-wrap; padding: 12px; border-radius: 8px; min-height: 80px; overflow:auto; }
+      .out { background: #0b1020; color: #c9e2ff; white-space: pre-wrap; padding: 12px; border-radius: 8px; min-height: 80px; overflow:auto; font-family: monaco, SFMono-Regular, Menlo, Consolas, monospace; font-size: 8pt; line-height: 1.5; }
       .muted { color: #666; font-size: 12px; display: none }
       .tag { display:inline-block; color:#334; padding:2px 8px; border-radius:999px; font-size:12px; margin-left:8px; font-weight: 160; float: right; }
+      /* --- Visualization of parsed JSON scores --- */
+      .viz { margin-top: 0; }
+      .tiles { display: flex; gap: 14px; align-items: stretch; flex-wrap: wrap; margin: 12px 0 4px; }
+      .tile { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 80px; padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.03); }
+      .tile .emoji { font-size: 28px; line-height: 1; }
+      .tile .score { font-size: 12px; color: #334; margin-top: 4px; }
+      .tile .label { font-size: 11px; color: #666; text-transform: capitalize; margin-top: 2px; }
+      .results { display: flex; gap: 12px; align-items: stretch; flex-wrap: wrap; }
+      .results .viz { flex: 1 1 280px; }
+      .results .full-score { flex: 2 1 560px; min-width: 420px; }
+      .full-score .out { width: 100%; }
     </style>
   </head>
   <body>
     <div class="card">
-      <h1>Buzz — Emotion & Sentiment <span class="tag">sveselev-moonshine 2025</span></h1>
+      <h1>Buzz Classifier — Emotion & Sentiment <span class="tag">sveselev-moonshine 2025</span></h1>
       <div id="app"></div>
       <p class="muted">Tip: this page calls the same-origin API. Deploying elsewhere may require CORS.</p>
       <p style="text-align:left; margin-top:16px;">
@@ -70,6 +81,12 @@
             const [error, setError] = useState('');
             const [result, setResult] = useState('');
 
+            const THRESH = 0.10; // hide scores below 0.10
+            const toPct = v => (v * 100).toFixed(1) + '%';
+            const safeParse = (s) => { try { return JSON.parse(s); } catch (e) { return null; } };
+            const EMOJI = { JOY:'😊', SADNESS:'😢', ANGER:'😠', FEAR:'😨', DISGUST:'🤢', SURPRISE:'😮', NEUTRAL:'😐' };
+            const SENT_EMOJI = { POSITIVE:'🙂', NEGATIVE:'🙁', NEUTRAL:'😐' };
+
         async function run() {
             setLoading(true); setError(''); setResult('');
             try {
@@ -105,7 +122,73 @@
 
             {error && <p style={{color:'#b00020'}}>Error: {error}</p>}
             <label>Result</label>
-            <pre className="out">{result || '—'}</pre>
+            <div className="results">
+              {(() => {
+                const data = safeParse(result);
+                const emotions = data && (data.Emotion || data.emotion);
+                const sentiment = data && (data.Sentiment || data.sentiment);
+
+                const emoTiles = emotions ? Object.entries(emotions)
+                  .filter(([k,v]) => typeof v === 'number')
+                  .sort((a,b) => b[1] - a[1])
+                  .slice(0, 3) : [];
+
+                const sentTiles = sentiment ? Object.entries(sentiment)
+                  .filter(([k,v]) => typeof v === 'number')
+                  .sort((a,b) => b[1] - a[1])
+                  .slice(0, 3) : [];
+
+                return (
+                  <div className="viz">
+                    <div className="tiles">
+                      {emoTiles.length > 0 ? (
+                        emoTiles.map(([k,v]) => (
+                          <div key={'e'+k} className="tile">
+                            <div className="emoji">{EMOJI[k] || '🙂'}</div>
+                            <div className="score">{toPct(v)}</div>
+                            <div className="label">{k.toLowerCase()}</div>
+                          </div>
+                        ))
+                      ) : (
+                        <React.Fragment>
+                          <div className="tile" style={{opacity:.6}}>
+                            <div className="emoji">🙂</div>
+                            <div className="label">No data yet</div>
+                          </div>
+                          <div className="tile" style={{opacity:.6}}></div>
+                          <div className="tile" style={{opacity:.6}}></div>
+                        </React.Fragment>
+                      )}
+                    </div>
+
+                    <div className="tiles">
+                      {sentTiles.length > 0 ? (
+                        sentTiles.map(([k,v]) => (
+                          <div key={'s'+k} className="tile">
+                            <div className="emoji">{SENT_EMOJI[k] || '😐'}</div>
+                            <div className="score">{toPct(v)}</div>
+                            <div className="label">{k.toLowerCase()}</div>
+                          </div>
+                        ))
+                      ) : (
+                        <React.Fragment>
+                          <div className="tile" style={{opacity:.6}}>
+                            <div className="emoji">🙂</div>
+                            <div className="label">No data yet</div>
+                          </div>
+                          <div className="tile" style={{opacity:.6}}></div>
+                          <div className="tile" style={{opacity:.6}}></div>
+                        </React.Fragment>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div className="full-score">
+                <pre className="out">{result || '—'}</pre>
+              </div>
+            </div>
           </div>
         );
       }

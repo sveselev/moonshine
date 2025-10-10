@@ -1,7 +1,7 @@
 name: keep-render-awake
 on:
   schedule:
-    - cron: "*/13 * * * *"    # every 13 minutes
+    - cron: "*/11 * * * *"
   workflow_dispatch:
 jobs:
   ping:
