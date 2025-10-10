@@ -8,26 +8,28 @@
     <style>
       *, *::before, *::after { box-sizing: border-box; }
       body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; }
-      .card { max-width: 900px; margin: 0 auto; border: 1px solid #ddd; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,.06); background-color: snow; }
+      .card { max-width: 800px; margin: 0 auto; border: 1px solid #ddd; border-radius: 9px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,.06); background-color: snow; }
       h1 { font-size: 20px; margin: 0 0 16px; }
       label { font-weight: 600; display: block; margin: 12px 0 6px; }
       textarea { width: 100%; min-height: 120px; padding: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
       select, button, input[type=text] { padding: 8px 10px; font-size: 14px; }
       .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
       .row > * { margin: 6px 0; }
-      .out { background: #0b1020; color: #c9e2ff; white-space: pre-wrap; padding: 12px; border-radius: 8px; min-height: 80px; overflow:auto; font-family: monaco, SFMono-Regular, Menlo, Consolas, monospace; font-size: 8pt; line-height: 1.5; }
+      .out { background: #0b1020; color: #c9e2ff; white-space: pre-wrap; padding: 12px; border-radius: 6px; min-height: 80px; overflow:auto; font-family: monaco, SFMono-Regular, Menlo, Consolas, monospace; font-size: 8pt; line-height: 1.5; }
       .muted { color: #666; font-size: 12px; display: none }
       .tag { display:inline-block; color:#334; padding:2px 8px; border-radius:999px; font-size:12px; margin-left:8px; font-weight: 160; float: right; }
       /* --- Visualization of parsed JSON scores --- */
       .viz { margin-top: 0; }
       .tiles { display: flex; gap: 14px; align-items: stretch; flex-wrap: wrap; margin: 12px 0 4px; }
-      .tile { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 80px; padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.03); }
+      .tile { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80px; min-width: 80px; padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.03); }
+      .tiles.emotions .tile { background: #f6f9ff; }
+      .tiles.sentiment .tile { background: #f9fff6; }
       .tile .emoji { font-size: 28px; line-height: 1; }
       .tile .score { font-size: 12px; color: #334; margin-top: 4px; }
       .tile .label { font-size: 11px; color: #666; text-transform: capitalize; margin-top: 2px; }
       .results { display: flex; gap: 12px; align-items: stretch; flex-wrap: wrap; }
       .results .viz { flex: 1 1 280px; }
-      .results .full-score { flex: 2 1 560px; min-width: 420px; }
+      .results .full-score { flex: 2 1 460px; min-width: 320px; }
       .full-score .out { width: 100%; }
     </style>
   </head>
@@ -140,7 +142,7 @@
 
                 return (
                   <div className="viz">
-                    <div className="tiles">
+                    <div className="tiles emotions">
                       {emoTiles.length > 0 ? (
                         emoTiles.map(([k,v]) => (
                           <div key={'e'+k} className="tile">
@@ -161,7 +163,7 @@
                       )}
                     </div>
 
-                    <div className="tiles">
+                    <div className="tiles sentiment">
                       {sentTiles.length > 0 ? (
                         sentTiles.map(([k,v]) => (
                           <div key={'s'+k} className="tile">
