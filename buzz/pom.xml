@@ -69,6 +69,28 @@
       </dependency>
 
       <dependency>
+          <groupId>ai.djl</groupId>
+          <artifactId>api</artifactId>
+          <version>${djl.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>ai.djl.huggingface</groupId>
+          <artifactId>tokenizers</artifactId>
+          <version>${djl.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>ai.djl.pytorch</groupId>
+          <artifactId>pytorch-engine</artifactId>
+          <version>${djl.version}</version>
+      </dependency>
+<!--      <dependency>
+          <groupId>ai.djl.pytorch</groupId>
+          <artifactId>pytorch-native-auto</artifactId>
+          <version>${pytorch.version}</version>
+          <scope>runtime</scope>
+      </dependency> -->
+
+      <dependency>
           <groupId>com.atilika.kuromoji</groupId>
           <artifactId>kuromoji-ipadic</artifactId>
           <version>${kuromoji.version}</version>

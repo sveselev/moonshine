@@ -6,17 +6,46 @@
 
   <repositories>
     <repository>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+
+    <repository>
       <id>zemberek-repo</id>
       <name>Zemberek Maven Repo (GitHub)</name>
       <url>https://raw.github.com/ahmetaa/maven-repo/master</url>
-    <releases>
-      <enabled>true</enabled>
-    </releases>
-    <snapshots>
-      <enabled>false</enabled>
-    </snapshots>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
   </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 
   <!-- Inherit Spring Boot's dependency management for all modules -->
   <parent>
@@ -51,6 +80,8 @@
     <zhconverter.version>1.0</zhconverter.version>
     <commons-lang3.version>3.18.0</commons-lang3.version>
     <lombok.version>1.18.30</lombok.version>
+      <djl.version>0.31.1</djl.version>
+      <pytorch.version>2.3.1</pytorch.version>
   </properties>
 
   <build>

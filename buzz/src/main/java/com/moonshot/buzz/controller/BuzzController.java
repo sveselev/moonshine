@@ -4,10 +4,10 @@ import com.moonshot.buzz.buzz3.SentimentClassifier;
 import com.moonshot.buzz.buzz3.SentimentClassifier.SentimentLabel;
 import com.moonshot.buzz.buzz3.SentimentClassifier.SentimentResult;
 import com.moonshot.buzz.buzz3.SimpleBuzz;
-import com.moonshot.buzz.emotion.BuzzEmotionClassifier;
 import com.moonshot.buzz.emotion.BuzzEmotionClassifier.SupportedLanguage;
 import com.moonshot.buzz.emotion.EmotionClassifier;
 import com.moonshot.buzz.emotion.EmotionLabel;
+import com.moonshot.buzz.hf.HFEmotionClassifier;
 import com.moonshot.buzz.swagger.LanguageParam;
 import com.moonshot.buzz.swagger.TextInputParam;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,7 +60,7 @@ public class BuzzController {
             @LanguageParam
             @RequestParam(defaultValue = DEFAULT_LNG) String lang) {
         Map<String, String> res = new HashMap<>();
-        res.put("Emotion", emotionClassifier.classify(text, DEFAULT_LNG).map(Enum::name).orElse("NO EMOTION"));
+        res.put("Emotion", emotionClassifier.classify(text, lang).map(Enum::name).orElse("NO EMOTION"));
         res.put("Sentiment", sentimentClassifier.computeSentiment(text, lang).name());
         return ResponseEntity.ok(res);
     }
@@ -80,7 +80,8 @@ public class BuzzController {
             @LanguageParam
             @RequestParam(defaultValue = DEFAULT_LNG) String lang) {
 
-        Map<EmotionLabel, Float> emoMap = emotionClassifier.score(text, SupportedLanguage.English, true);
+        SupportedLanguage supportedLang = SupportedLanguage.ofLanguageCode(lang).orElse(SupportedLanguage.English);
+        Map<EmotionLabel, Float> emoMap = emotionClassifier.score(text, supportedLang, true);
         Map<String, BigDecimal> emoRes = emoMap.entrySet().stream().collect(
                 Collectors.toMap(e -> e.getKey().name(),
                         e -> BigDecimal.valueOf(e.getValue()).setScale(4, RoundingMode.HALF_UP),
@@ -107,7 +108,7 @@ public class BuzzController {
 
     @Operation(
             summary = "Classify dominant emotion",
-            description = "Returns the dominant emotion label for the provided text (English only)."
+            description = "Returns the dominant emotion label for the provided text."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Emotion label returned",
@@ -116,14 +117,16 @@ public class BuzzController {
     @GetMapping(path = "/emotion")
     public ResponseEntity<?> getEmotion(
             @TextInputParam
-            @RequestParam(defaultValue = DEFAULT_TXT) String text) {
-        Optional<EmotionLabel> emo = emotionClassifier.classify(text, DEFAULT_LNG);
+            @RequestParam(defaultValue = DEFAULT_TXT) String text,
+            @LanguageParam
+            @RequestParam(defaultValue = DEFAULT_LNG) String lang) {
+        Optional<EmotionLabel> emo = emotionClassifier.classify(text, lang);
         return ResponseEntity.ok(emo.map(Enum::name).orElse("NO EMOTION"));
     }
 
     @Operation(
             summary = "Get emotion scores",
-            description = "Returns normalized scores for each emotion for the given text (English only)."
+            description = "Returns normalized scores for each emotion for the given text."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Map of emotion scores",
@@ -132,9 +135,12 @@ public class BuzzController {
     @GetMapping(path = "/emotion/score")
     public Map<String, Map<EmotionLabel, Float>> getEmotionScore(
             @TextInputParam
-            @RequestParam(defaultValue = DEFAULT_TXT) String text) {
+            @RequestParam(defaultValue = DEFAULT_TXT) String text,
+            @LanguageParam
+            @RequestParam(defaultValue = DEFAULT_LNG) String lang) {
+        SupportedLanguage supportedLang = SupportedLanguage.ofLanguageCode(lang).orElse(SupportedLanguage.English);
         Map<String, Map<EmotionLabel, Float>> response = new HashMap<>();
-        response.put(text, emotionClassifier.score(text, SupportedLanguage.English, true));
+        response.put(text, emotionClassifier.score(text, supportedLang, true));
         return response;
     }
 
@@ -209,8 +215,8 @@ public class BuzzController {
     public static class BuzzControllerConfiguration {
         @Bean
         @Lazy
-        public EmotionClassifier getEmotionClassifier() {
-            return BuzzEmotionClassifier.INSTANCE;
+        public EmotionClassifier getEmotionClassifier() throws Exception {
+            return new HFEmotionClassifier("j-hartmann/emotion-english-distilroberta-base");
         }
 
         @Bean
